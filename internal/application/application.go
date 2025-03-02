@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -33,10 +34,28 @@ func New() *Application {
 	}
 }
 
+type Task struct {
+	ID            int     `json:"id"`
+	Arg1          float64 `json:"arg1"`
+	Arg2          float64 `json:"arg2"`
+	Operation     string  `json:"operation"`
+	OperationTime int     `json:"operation_time"`
+}
+
 // Функция запуска сервера
-func (a *Application) RunServer() error {
-	http.HandleFunc("/api/v1/calculate", CalcHandler)
-	return http.ListenAndServe(":"+a.config.Addr, nil)
+func (a *Application) RunServer() {
+
+	// Запускаем оркестратор
+	go RunOrchestrator()
+
+	// Даем время оркестратору запуститься
+	time.Sleep(1 * time.Second)
+
+	// Запускаем агента
+	go RunAgent()
+
+	log.Println("Application started successfully")
+
 }
 
 type Request struct {
